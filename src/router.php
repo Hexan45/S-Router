@@ -10,6 +10,7 @@
     use Router\Exceptions\RouteHasRegisteredException;
     use Router\Exceptions\ControllerNotExistsException;
     use Router\Exceptions\ControllerMethodNotExistsException;
+    use Router\Exceptions\RouteNotFoundException;
 
     class router {
         static private array $registeredRoutes = [
@@ -59,11 +60,16 @@
 
         static public function resolve() : void {
             $requestObject = self::createRequestObject();
-            $requestObject->uri = array_filter(explode('/', $requestObject->uri)) ?: '/';
-            var_dump($requestObject->uri);
-        }
 
-        static public function showRoutes() : array {
-            return self::$registeredRoutes;
+            $controller = self::$registeredRoutes[$requestObject->method];
+            if(!array_key_exists($requestObject->uri, $controller)) {
+                throw new RouteNotFoundException();
+            }
+
+            call_user_func_array(
+                ((is_array($controller[$requestObject->uri])) ?
+                [new $controller[$requestObject->uri][0], $controller[$requestObject->uri][1]] :
+                $controller[$requestObject->uri]),
+            []);
         }
     }
