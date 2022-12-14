@@ -15,6 +15,3 @@
     router::get('/contact', '\Controllers\DefaultController@contact');
 
     router::resolve();
-
-    echo '<pre>';
-    print_r(router::showRoutes());
