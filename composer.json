@@ -13,6 +13,6 @@
             "name": "Hexan45"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "require": {}
 }
