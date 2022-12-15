@@ -3,73 +3,73 @@
 
     namespace Router;
 
-    //[AdminController::class, 'methodName']
-    //'AdminController@methodName'
-    //Closure
-
+    //Routing exceptions
     use Router\Exceptions\RouteHasRegisteredException;
+    use Router\Exceptions\RouteNotFoundException;
     use Router\Exceptions\ControllerNotExistsException;
     use Router\Exceptions\ControllerMethodNotExistsException;
-    use Router\Exceptions\RouteNotFoundException;
 
-    class router {
+    //Request class for delivery request data
+    use Router\Parser\Request;
+
+    //Route interface for methods
+    use Router\RouteInterface;
+
+    /**
+     * Router class for manage routes in application
+     * 
+     * @var array $registeredRoutes array of all registered routes data
+     * 
+     * @author Hexan45
+     */
+    class Router {
         static private array $registeredRoutes = [
             'GET' => []
         ];
-        static private object $request;
 
-        static private function registerRoute(array $routeValues) : void {
-            list($routePath, $routeMethod, $routeController) = $routeValues;
+        /**
+         * This method has checking for errors and register route in array
+         * 
+         * @param RouteInterface $routeInterface Instance of route methods class like GET/POST which described interface named RouteInterface
+         */
+        static public function registerRoute(RouteInterface $routeInstance) : void {
 
-            if(array_key_exists($routePath, self::$registeredRoutes[$routeMethod])) {
-                throw new RouteHasRegisteredException('Path named ' . $routePath . ' has exists in registered routes array');
+            //Check for equls existing route in array if find throw exception
+            if(array_key_exists($routeInstance->routePath, self::$registeredRoutes[$routeInstance::ROUTE_METHOD])) {
+                throw new RouteHasRegisteredException('Path named ' . $routeInstance->routePath . ' has exists in registered routes array');
             }
 
-            if(!is_callable($routeController)) {
-                list($controllerClass, $controllerMethod) = (is_string($routeController)) ? explode('@', $routeController) : $routeController;
-    
-                if(!class_exists($controllerClass)) {
-                    throw new ControllerNotExistsException('Controller which your are trying register to route ' . $routePath . ' not exists');
-                }
-    
-                if(!method_exists($controllerClass, $controllerMethod)) {
-                    throw new ControllerMethodNotExistsException($controllerMethod . ' method not exists in ' . $controllerClass . ' controller');
-                }
-
-                $routeController = [$controllerClass, $controllerMethod];
+            if(!is_callable($routeInstance->routeController)) {
+                //Check if exists class controller which has assigned to route if not exists throw exception
+                if(!class_exists($routeInstance->routeController[0]))
+                    throw new ControllerNotExistsException('Controller which your are trying register to route ' . $routeInstance->routePath . ' not exists.');
+                
+                //Check if exists class method which has assigned to route if not exits throw exception
+                if(!method_exists($routeInstance->routeController[0], $routeInstance->routeController[1]))
+                    throw new ControllerMethodNotExistsException('Controller method named ' . $routeInstance->routeController[1] . ' not exists in ' . $routeInstance->routeController[0]);
             }
 
-            self::$registeredRoutes[$routeMethod][$routePath] = $routeController;
-
+            //Join new route into all registered routes array
+            self::$registeredRoutes[$routeInstance::ROUTE_METHOD][$routeInstance->routePath] = $routeInstance->routeController;
         }
 
-        static public function get(string $routePath, callable|array|string $routeController) : void {
-            try {
-                self::registerRoute([$routePath, 'GET', $routeController]);
-            } catch(\Throwable $exception) {
-                exit('Route error : ' . $exception->getMessage());
-            }
-        }
-
-        static private function createRequestObject() : object {
-            self::$request = new \stdClass();
-            self::$request->method = $_SERVER['REQUEST_METHOD'];
-            self::$request->uri = filter_var(strip_tags($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL);
-            return self::$request;
-        }
-
+        /**
+         * 
+         * This methods search for registered route using uri path entered by client and envoke controller if route not exists
+         * in array throw new exception
+         * 
+         */
         static public function resolve() : void {
-            $requestObject = self::createRequestObject();
+            $request = new Request();
 
-            $controller = self::$registeredRoutes[$requestObject->method];
-            if(!array_key_exists($requestObject->uri, $controller)) {
+            //Search for same route
+            if(!array_key_exists($request->uri, self::$registeredRoutes[$request->method])) {
                 throw new RouteNotFoundException();
             }
 
-            call_user_func_array(
-                ((is_array($controller[$requestObject->uri])) ?
-                [new $controller[$requestObject->uri][0], $controller[$requestObject->uri][1]] :
-                $controller[$requestObject->uri]),
-            []);
+            $controller = self::$registeredRoutes[$request->method][$request->uri];
+            //Call to class and method or function specified while creating route
+            call_user_func_array(((is_array($controller)) ? [new $controller[0], $controller[1]] : $controller), []);
         }
+        
     }

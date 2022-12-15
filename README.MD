@@ -25,25 +25,26 @@ To start using library create file named `index.php` in your root directory and 
 
 ## Usage
 
-In `index.php` file you must import router class by enter this code `use Router/router;`
+In `index.php` file you must import router class by enter this code `use Router/Route;`
+
+**Create Route class instance**
+
+```sh
+$Route = new Route();
+```
 
 **Register path for GET uri method**
 
 ```sh
-router::get(routePath: '/', routeController: callbackFunction());
+$Route->get(routePath: '/', routeController: callbackFunction());
 or
-router::get(routePath: '/', routeController: [somethingControllerClass::class, 'somethingControllerMethod']);
+$Route->get(routePath: '/', routeController: [somethingControllerClass::class, 'somethingControllerMethod']);
 or
-router::get(routePath: '/', routeController: 'somethingControllerClass@somethingControllerMethod');
+$Route->get(routePath: '/', routeController: 'somethingControllerClass@somethingControllerMethod');
 ```
-**Resolving all registered methods**
 
-To resolve the registered routes to actually url you must use `router::resolve()` under below all methods which register routes like that `router::get()`
-
-## Contructions of the methods in router.php
+## Methods arguments
 
 **Get**
-`static public function get(string $routePath, callable|array|string $routeController) : void`
-
-**Resolve**
-`static public function resolve() : void`
+- `routePath (string) - Path of uri which will be register in router`
+- `routeController (callable|array|string) - Code access details which specify code to run when user enter registered route path`
