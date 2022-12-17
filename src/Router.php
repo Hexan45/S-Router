@@ -24,7 +24,8 @@
      */
     class Router {
         static private array $registeredRoutes = [
-            'GET' => []
+            'GET' => [],
+            'POST' => []
         ];
 
         /**

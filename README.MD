@@ -36,15 +36,29 @@ $Route = new Route();
 **Register path for GET uri method**
 
 ```sh
-$Route->get(routePath: '/', routeController: callbackFunction());
+$Route->Get(routePath: '/', routeController: callbackFunction());
 or
-$Route->get(routePath: '/', routeController: [somethingControllerClass::class, 'somethingControllerMethod']);
+$Route->Get(routePath: '/', routeController: [somethingControllerClass::class, 'somethingControllerMethod']);
 or
-$Route->get(routePath: '/', routeController: 'somethingControllerClass@somethingControllerMethod');
+$Route->Get(routePath: '/', routeController: 'somethingControllerClass@somethingControllerMethod');
+```
+
+**Register path for POST uri method**
+
+```sh
+$Route->Post(routePath: '/', routeController: callbackFunction());
+or
+$Route->Post(routePath: '/', routeController: [somethingControllerClass::class, 'somethingControllerMethod']);
+or
+$Route->Post(routePath: '/', routeController: 'somethingControllerClass@somethingControllerMethod');
 ```
 
 ## Methods arguments
 
 **Get**
-- `routePath (string) - Path of uri which will be register in router`
-- `routeController (callable|array|string) - Code access details which specify code to run when user enter registered route path`
+- `routePath (string)` - Path of uri which will be register in router
+- `routeController (callable|array|string)` - Code access details which specify code to run when user enter registered route path
+
+**Post**
+- `routePath (string)` - Path of uri which will be register in router
+- `routeController (callable|array|string)` - Code access details which specify code to run when user enter registered route path

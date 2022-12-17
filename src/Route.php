@@ -22,7 +22,7 @@
             try {
                 Router::registerRoute($routeInstance->prepare());
             } catch(\Throwable $exception) {
-                echo '<b>Router exception occurred:</b> ' . $exception->getMessage();
+                echo '<b>Router exception occurred:</b> ' . $exception->getMessage() . 'Code: ' . $exception->getLine() . ' ' . $exception->getFile();
             }
         }
 
@@ -33,7 +33,7 @@
          * @param array $arguments Parameters to inject into class constructor
          * 
          */
-        public function __call($name, $arguments) : void {
+        public function __call($name, $arguments) : void{
             $name = __NAMESPACE__ . '\\' . 'Methods' . '\\' . $name;
             $this->sendToRouter(new $name($arguments[0], $arguments[1]));
         }
