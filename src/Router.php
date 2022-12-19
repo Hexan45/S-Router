@@ -51,26 +51,57 @@
             }
 
             //Join new route into all registered routes array
-            self::$registeredRoutes[$routeInstance::ROUTE_METHOD][$routeInstance->routePath] = $routeInstance->routeController;
+            self::$registeredRoutes[$routeInstance::ROUTE_METHOD][$routeInstance->routePath] = [
+                $routeInstance->routeController,
+                $routeInstance->routeParams
+            ];
         }
 
         /**
          * 
-         * This methods search for registered route using uri path entered by client and envoke controller if route not exists
-         * in array throw new exception
+         * This method prepare dynamic route parameters for final controller
+         * 
+         * @param array|callable $controller Controller data
+         * @param ?array $params Optional route parameters
+         * @param Request $request Object which has data about request
+         * 
+         */
+        static private function call(array|callable $controller, ?array $params = null, Request $request) : void {
+            //Change string to array, this is a uri entered by client
+            $requestParts = explode('/', $request->uri);
+            array_shift($requestParts);
+
+            //Search and get parameters from request object
+            $params = array_flip($params);
+            foreach($params as $key => $value) {
+                $params[$key] = $requestParts[$value];
+            }
+
+            //Call to class and method or function specified while creating route
+            call_user_func_array(((is_array($controller)) ? [new $controller[0], $controller[1]] : $controller), $params);
+        }
+
+        /**
+         * 
+         * This methods search for registered route by compare uri regular expression to request uri and calling to function named call
+         * with route data. If route not exists then throwing new exception
          * 
          */
         static public function resolve() : void {
             $request = new Request();
 
-            //Search for same route
-            if(!array_key_exists($request->uri, self::$registeredRoutes[$request->method])) {
-                throw new RouteNotFoundException();
+            //Iterate on all registered routes
+            foreach(self::$registeredRoutes[$request->method] as $routeURI => $routeData) {
+                //Compase regular expression with request uri
+                if(preg_match($routeURI, preg_quote($request->uri), $matches)) {
+                    //If match has exists call to function
+                    self::call($routeData[0], $routeData[1], $request);
+                    return;
+                }
             }
 
-            $controller = self::$registeredRoutes[$request->method][$request->uri];
-            //Call to class and method or function specified while creating route
-            call_user_func_array(((is_array($controller)) ? [new $controller[0], $controller[1]] : $controller), []);
+            //Throw route not found exception
+            throw new RouteNotFoundException();
         }
         
     }

@@ -1,6 +1,6 @@
-# Simple PHP router library
+# PHP router library
 
-Simple router library created with PHP language 
+router library created with PHP language 
 
 ## Installation
 
@@ -52,6 +52,20 @@ $Route->Post(routePath: '/', routeController: [somethingControllerClass::class, 
 or
 $Route->Post(routePath: '/', routeController: 'somethingControllerClass@somethingControllerMethod');
 ```
+
+**Register dynamic routes**
+
+```sh
+$Route->Post(routePath: '/article/$id', routeController: callbackFunction($id));
+or
+$Route->Post(routePath: '/some/$someID/thing/$thingID', routeController: callbackFunction($someID, $thingID));
+```
+Important thing! You must add the same names in callbackFunctions/methods parameters as in routePath.
+
+*Example*
+`$Route->Post(routePath: '/article/$id', 'AdminController@index');`
+So in AdminController class, your index method should look like this
+`public function index($id) {...someCode}`
 
 ## Methods arguments
 
