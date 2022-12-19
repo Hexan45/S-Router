@@ -63,8 +63,11 @@ $Route->Post(routePath: '/some/$someID/thing/$thingID', routeController: callbac
 Important thing! You must add the same names in callbackFunctions/methods parameters as in routePath.
 
 *Example*
+
 `$Route->Post(routePath: '/article/$id', 'AdminController@index');`
+
 So in AdminController class, your index method should look like this
+
 `public function index($id) {...someCode}`
 
 ## Methods arguments
